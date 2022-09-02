@@ -1,8 +1,9 @@
-const app = require("express").Router();
+const fs = require("fs");
+const router = require("express").Router();
 const { v4: uuidv4 } = require("uuid");
 const { readAndAppend, readFromFile } = require("../helpers/fsUtils");
 
-// // GET Route for retrieving all the notes
+// // GET Route for retrieving all the noparstes
 // app.get("/notes", (req, res) =>
 //   // console.log("Get Notes: Call router")
 //   readFromFile("./db/db.json", "utf-8").then((data) => {
@@ -10,15 +11,22 @@ const { readAndAppend, readFromFile } = require("../helpers/fsUtils");
 //   res.json(JSON.parse(data)))
 //     }
 // );
-app.get("/notes", (req, res) => {
-  readFromFile("db/db.json", "utf-8").then((data) =>
-    res.json(JSON.parse(data))
-  );
+router.get("/notes", (req, res) => {
+  readFromFile("db/db.json", "utf-8").then((data) => {
+    let parseNotes;
+    try {
+      parseNotes = [].concat(JSON.parse(data));
+    } catch (err) {
+      parseNotes = [];
+    }
+    // return parseNotes;
+    res.json(parseNotes);
+  });
 });
 
 // POST Route for submitting notes
 
-app.post("/notes", (req, res) => {
+router.post("/notes", (req, res) => {
   //   // Destructuring assignment for the items in req.body
   const { title, text } = req.body;
 
@@ -44,4 +52,15 @@ app.post("/notes", (req, res) => {
   }
 });
 
-module.exports = app;
+router.delete("/notes/:notes_id", (req, res) => {
+  console.log("notes_id", req.params.notes_id);
+  // reading notes form db.json
+  let db = JSON.parse(fs.readFileSync("db/db.json"));
+  // removing note with id
+  let deleteNotes = db.filter((item) => item.id !== req.params.notes_id);
+  // Rewriting note to db.json
+  fs.writeFileSync("db/db.json", JSON.stringify(deleteNotes));
+  res.json(deleteNotes);
+});
+
+module.exports = router;
