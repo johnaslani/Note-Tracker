@@ -13,7 +13,7 @@ router.get("/notes", (req, res) => {
   console.log(__dirname);
 });
 
-// Wildcard route to direct users to a 404 page
+// Wildcard route to direct users to main page
 router.get("*", (req, res) =>
   res.sendFile(path.join(__dirname, "../public/index.html"))
 );
